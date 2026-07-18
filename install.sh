@@ -11,10 +11,12 @@ if [ ! -f "src/.env" ]; then
     cp src/.env.example src/.env
 fi
 
+
 echo
 echo "Building and starting Docker containers..."
 
 docker compose up -d --build
+
 
 echo
 echo "Waiting for PostgreSQL..."
@@ -26,35 +28,46 @@ done
 
 echo "PostgreSQL is ready."
 
+
 echo
 echo "Installing Composer dependencies..."
 
-docker compose exec -T php composer install
+docker compose exec -T -w /var/www php composer install
+
 
 echo
 echo "Generating APP_KEY..."
 
-docker compose exec -T php php artisan key:generate --force
+docker compose exec -T -w /var/www php php artisan key:generate --force
+
 
 echo
-echo "Setting permissions..."
+echo "Setting Laravel permissions..."
 
-chmod -R ug+rwX storage bootstrap/cache
+docker compose exec -T -w /var/www php chmod -R ug+rwX storage bootstrap/cache
+
 
 echo
 echo "Installing Node dependencies..."
 
-docker compose exec -T node npm install
+docker compose exec -T -w /var/www node npm install
+
 
 echo
 echo "Running migrations..."
 
-docker compose exec -T php php artisan migrate
+docker compose exec -T -w /var/www php php artisan migrate
+
 
 echo
 echo "======================================"
 echo " Installation completed successfully!"
 echo "======================================"
+
 echo
-echo "Laravel: http://localhost:8080"
-echo "Vite:     http://localhost:5173"
+echo "Laravel:"
+echo "http://localhost:8080"
+
+echo
+echo "Vite:"
+echo "http://localhost:5173"

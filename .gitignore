@@ -19,3 +19,6 @@ src/public/fonts-manifest.dev.json
 # OS
 .DS_Store
 Thumbs.db
+
+# Composer cache
+src/.composer/
