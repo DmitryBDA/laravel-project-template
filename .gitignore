@@ -1,0 +1,18 @@
+# Laravel
+src/vendor/
+src/node_modules/
+src/.env
+
+# Docker
+.env
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

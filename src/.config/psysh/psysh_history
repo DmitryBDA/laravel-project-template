@@ -1,0 +1,3 @@
+Cache::put('test', 'redis works', 60);
+Cache::get('test');
+exit
