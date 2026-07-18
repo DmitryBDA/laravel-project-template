@@ -66,36 +66,6 @@ cd laravel-project
 
 ---
 
-# Настройка Docker
-
-Создать Docker окружение:
-
-```bash
-cp .env.example .env
-```
-
-Файл `.env` в корне проекта:
-
-```env
-UID=1000
-GID=1000
-```
-
-Проверить свои значения:
-
-```bash
-id
-```
-
-Если UID/GID отличаются, изменить:
-
-```env
-UID=ваш_uid
-GID=ваш_gid
-```
-
----
-
 # Настройка Laravel
 
 Перейти в Laravel:
@@ -505,7 +475,6 @@ docker compose exec node npm run build
 ```
 laravel-project
 │
-├── .env.example
 ├── .gitignore
 ├── docker-compose.yml
 │

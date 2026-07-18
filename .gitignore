@@ -16,3 +16,6 @@ src/.env
 # OS
 .DS_Store
 Thumbs.db
+
+# Composer
+src/.composer/
