@@ -1,28 +1,36 @@
 # Laravel Docker Environment
 
-Полноценное окружение для разработки Laravel:
+Полноценное Docker-окружение для локальной разработки Laravel 13.
 
-- PHP 8.4 FPM
-- Laravel 13
-- Nginx
-- PostgreSQL 17
-- Redis
-- Node.js 22
-- Vite
-- Docker Compose
+## Технологии
 
-Проект подготовлен для локальной разработки через WSL + Docker.
+| Технология | Версия |
+|---|---|
+| PHP | 8.4 FPM |
+| Laravel | 13 |
+| Nginx | Alpine |
+| PostgreSQL | 17 |
+| Redis | Alpine |
+| Node.js | 22 |
+| Vite | Latest |
+| Docker Compose | Latest |
+
+Окружение подготовлено для:
+
+- Windows + WSL2
+- Linux
+- Docker Desktop
 
 ---
 
-## Требования
+# Требования
 
 Перед началом должны быть установлены:
 
 - Docker
 - Docker Compose
 - Git
-- WSL2 (для Windows)
+- WSL2 (Windows)
 
 Проверка:
 
@@ -34,53 +42,63 @@ git --version
 
 ---
 
-# Быстрый запуск проекта
+# Установка проекта
 
-## 1. Клонирование репозитория
+## Клонирование
+
+SSH:
 
 ```bash
 git clone git@github.com:DmitryBDA/laravel-project.git
+```
 
+или HTTPS:
+
+```bash
+git clone https://github.com/DmitryBDA/laravel-project.git
+```
+
+Переход в проект:
+
+```bash
 cd laravel-project
 ```
 
 ---
 
-# 2. Запуск Docker контейнеров
+# Настройка Docker
 
-Собрать контейнеры:
-
-```bash
-docker compose build
-```
-
-Запустить:
+Создать Docker окружение:
 
 ```bash
-docker compose up -d
+cp .env.example .env
 ```
 
-Проверить:
+Файл `.env` в корне проекта:
+
+```env
+UID=1000
+GID=1000
+```
+
+Проверить свои значения:
 
 ```bash
-docker ps
+id
 ```
 
-Должны работать контейнеры:
+Если UID/GID отличаются, изменить:
 
-```
-laravel_nginx
-laravel_php
-laravel_postgres
-laravel_redis
-laravel_node
+```env
+UID=ваш_uid
+GID=ваш_gid
 ```
 
 ---
 
-# 3. Настройка Laravel
+# Настройка Laravel
 
-Перейти в папку проекта:
+Перейти в Laravel:
 
 ```bash
 cd src
@@ -92,19 +110,20 @@ cd src
 cp .env.example .env
 ```
 
-Если `.env` отсутствует:
+Вернуться назад:
 
 ```bash
-nano .env
+cd ..
 ```
 
-Добавить:
+Laravel `.env` должен содержать:
 
 ```env
 APP_NAME=Laravel
 APP_ENV=local
 APP_DEBUG=true
 APP_URL=http://localhost:8080
+
 
 DB_CONNECTION=pgsql
 DB_HOST=postgres
@@ -113,20 +132,62 @@ DB_DATABASE=laravel
 DB_USERNAME=laravel
 DB_PASSWORD=secret
 
+
 CACHE_STORE=redis
-QUEUE_CONNECTION=redis
+
 SESSION_DRIVER=redis
 
+QUEUE_CONNECTION=redis
+
+
+REDIS_CLIENT=phpredis
 REDIS_HOST=redis
-REDIS_PORT=6379
 REDIS_PASSWORD=null
+REDIS_PORT=6379
+
+
+VITE_APP_URL=http://localhost:8080
 ```
 
 ---
 
-# 4. Установка PHP зависимостей
+# Запуск Docker
 
-Из корня проекта:
+## Сборка контейнеров
+
+```bash
+docker compose build
+```
+
+---
+
+## Запуск
+
+```bash
+docker compose up -d
+```
+
+После запуска должны работать:
+
+```text
+laravel_nginx
+laravel_php
+laravel_postgres
+laravel_redis
+laravel_node
+```
+
+Проверка:
+
+```bash
+docker compose ps
+```
+
+---
+
+# Установка зависимостей
+
+## PHP зависимости
 
 ```bash
 docker compose exec php composer install
@@ -134,7 +195,7 @@ docker compose exec php composer install
 
 ---
 
-# 5. Генерация ключа Laravel
+## Laravel ключ
 
 ```bash
 docker compose exec php php artisan key:generate
@@ -142,23 +203,39 @@ docker compose exec php php artisan key:generate
 
 ---
 
-# 6. Миграции базы данных
+## Права Laravel
+
+```bash
+docker compose exec php chmod -R 775 storage bootstrap/cache
+```
+
+---
+
+## Миграции
 
 ```bash
 docker compose exec php php artisan migrate
 ```
 
+Проверка:
+
+```bash
+docker compose exec php php artisan migrate:status
+```
+
 ---
 
-# 7. Установка Node зависимостей
+# Node и Vite
+
+Node контейнер запускается автоматически.
+
+Установка зависимостей:
 
 ```bash
 docker compose exec node npm install
 ```
 
----
-
-# 8. Запуск Vite
+После установки перезапустить:
 
 ```bash
 docker compose restart node
@@ -211,7 +288,7 @@ localhost:6379
 
 # Docker команды
 
-## Запустить проект
+## Запуск
 
 ```bash
 docker compose up -d
@@ -219,7 +296,7 @@ docker compose up -d
 
 ---
 
-## Остановить проект
+## Остановка
 
 ```bash
 docker compose down
@@ -227,10 +304,18 @@ docker compose down
 
 ---
 
-## Перезапустить контейнеры
+## Перезапуск
 
 ```bash
 docker compose restart
+```
+
+---
+
+## Статус контейнеров
+
+```bash
+docker compose ps
 ```
 
 ---
@@ -243,11 +328,15 @@ docker compose logs -f
 
 ---
 
-## Логи Laravel/Nginx
+## Логи Nginx
 
 ```bash
 docker compose logs -f nginx
 ```
+
+---
+
+## Логи PHP
 
 ```bash
 docker compose logs -f php
@@ -255,7 +344,17 @@ docker compose logs -f php
 
 ---
 
-## Войти в PHP контейнер
+## Логи Node/Vite
+
+```bash
+docker compose logs -f node
+```
+
+---
+
+# Работа внутри контейнеров
+
+## PHP
 
 ```bash
 docker compose exec php bash
@@ -263,7 +362,7 @@ docker compose exec php bash
 
 ---
 
-## Войти в Node контейнер
+## Node
 
 ```bash
 docker compose exec node sh
@@ -271,9 +370,17 @@ docker compose exec node sh
 
 ---
 
+## PostgreSQL
+
+```bash
+docker compose exec postgres bash
+```
+
+---
+
 # Laravel команды
 
-## Очистить кеш
+Очистка кеша:
 
 ```bash
 docker compose exec php php artisan optimize:clear
@@ -281,7 +388,7 @@ docker compose exec php php artisan optimize:clear
 
 ---
 
-## Миграции
+Миграции:
 
 ```bash
 docker compose exec php php artisan migrate
@@ -289,7 +396,7 @@ docker compose exec php php artisan migrate
 
 ---
 
-## Откат миграций
+Откат:
 
 ```bash
 docker compose exec php php artisan migrate:rollback
@@ -297,7 +404,7 @@ docker compose exec php php artisan migrate:rollback
 
 ---
 
-## Создание контроллера
+Создание контроллера:
 
 ```bash
 docker compose exec php php artisan make:controller ExampleController
@@ -305,7 +412,7 @@ docker compose exec php php artisan make:controller ExampleController
 
 ---
 
-## Создание модели
+Создание модели:
 
 ```bash
 docker compose exec php php artisan make:model Example
@@ -313,15 +420,23 @@ docker compose exec php php artisan make:model Example
 
 ---
 
-# Redis проверка
-
-Войти в Laravel:
+Tinker:
 
 ```bash
 docker compose exec php php artisan tinker
 ```
 
-Проверка:
+---
+
+# Проверка Redis
+
+Войти:
+
+```bash
+docker compose exec php php artisan tinker
+```
+
+Выполнить:
 
 ```php
 Cache::put('test','redis works',60);
@@ -337,12 +452,65 @@ redis works
 
 ---
 
+# Проверка PHP
+
+Версия:
+
+```bash
+docker compose exec php php -v
+```
+
+Расширения:
+
+```bash
+docker compose exec php php -m
+```
+
+Redis:
+
+```bash
+docker compose exec php php -m | grep redis
+```
+
+---
+
+# Проверка Node
+
+Версия:
+
+```bash
+docker compose exec node node -v
+```
+
+npm:
+
+```bash
+docker compose exec node npm -v
+```
+
+---
+
+# Production build
+
+Проверка сборки:
+
+```bash
+docker compose exec node npm run build
+```
+
+---
+
 # Структура проекта
 
 ```
 laravel-project
 │
+├── .env.example
+├── .gitignore
+├── docker-compose.yml
+│
 ├── docker
+│   │
 │   ├── nginx
 │   │   └── default.conf
 │   │
@@ -351,37 +519,22 @@ laravel-project
 │       └── php.ini
 │
 ├── src
+│   │
 │   ├── app
 │   ├── artisan
+│   ├── bootstrap
 │   ├── config
 │   ├── database
 │   ├── public
 │   ├── resources
-│   ├── routes
-│   └── vendor
+│   └── routes
 │
-├── docker-compose.yml
-├── README.md
-└── .gitignore
+└── README.md
 ```
 
 ---
 
-# Используемые технологии
-
-| Технология | Версия |
-|---|---|
-| PHP | 8.4 |
-| Laravel | 13 |
-| PostgreSQL | 17 |
-| Redis | Alpine |
-| Node.js | 22 |
-| Nginx | Alpine |
-| Docker | Compose |
-
----
-
-# Git workflow
+# Git Workflow
 
 Получить изменения:
 
@@ -389,7 +542,7 @@ laravel-project
 git pull
 ```
 
-Создать новую ветку:
+Создать ветку:
 
 ```bash
 git checkout -b feature/example
@@ -411,6 +564,66 @@ git commit -m "Описание изменений"
 
 ```bash
 git push origin feature/example
+```
+
+---
+
+# Troubleshooting
+
+## Node контейнер не запускается
+
+Проверить:
+
+```bash
+docker compose ps -a
+```
+
+Логи:
+
+```bash
+docker compose logs node
+```
+
+---
+
+## Laravel не открывается
+
+Проверить:
+
+```bash
+docker compose ps
+```
+
+Логи:
+
+```bash
+docker compose logs nginx
+```
+
+---
+
+## Ошибка прав Laravel
+
+Выполнить:
+
+```bash
+docker compose exec php chmod -R 775 storage bootstrap/cache
+```
+
+---
+
+## Redis не работает
+
+Проверка:
+
+```bash
+docker compose exec redis redis-cli ping
+```
+
+Ответ:
+
+```
+PONG
 ```
 
 ---
