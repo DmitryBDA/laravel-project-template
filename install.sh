@@ -39,7 +39,7 @@ docker compose exec -T php php artisan key:generate --force
 echo
 echo "Setting permissions..."
 
-docker compose exec -T php chmod -R 775 storage bootstrap/cache
+chmod -R ug+rwX storage bootstrap/cache
 
 echo
 echo "Installing Node dependencies..."
