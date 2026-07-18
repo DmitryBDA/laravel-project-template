@@ -9,6 +9,7 @@ src/storage/framework/cache/*
 src/storage/framework/sessions/*
 src/storage/framework/views/*
 src/bootstrap/cache/
+src/storage/app/public
 
 # Keep Laravel folders
 !src/storage/logs/.gitignore
