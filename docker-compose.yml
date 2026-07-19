@@ -1,5 +1,7 @@
 services:
   php:
+    extra_hosts:
+        - "host.docker.internal:host-gateway"
     build:
       context: .
       dockerfile: docker/php/Dockerfile
@@ -14,6 +16,7 @@ services:
     volumes:
       - ./src:/var/www
       - ./docker/php/php.ini:/usr/local/etc/php/conf.d/custom.ini
+      - ./docker/php/xdebug.ini:/usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
 
     networks:
       - laravel
